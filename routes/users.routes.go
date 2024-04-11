@@ -25,6 +25,9 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("user not found"))
 	}
 
+	//"Tasks" es del model de user , osea asi es como se escribe
+	db.DB.Model(&user).Association("Tasks").Find(&user.Tasks)
+
 	json.NewEncoder(w).Encode(&user)
 }
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
