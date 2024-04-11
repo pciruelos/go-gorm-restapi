@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/pciruelos/go-gorm-restapi/db"
 	"github.com/pciruelos/go-gorm-restapi/models"
 )
@@ -14,7 +15,17 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&users)
 }
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Get User"))
+	var user models.User
+	params := mux.Vars(r)
+
+	db.DB.First(&user, params["id"])
+
+	if user.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("user not found"))
+	}
+
+	json.NewEncoder(w).Encode(&user)
 }
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -30,5 +41,15 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&user)
 }
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Delete"))
+	var user models.User
+	params := mux.Vars(r)
+
+	db.DB.First(&user, params["id"])
+	if user.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("user not found"))
+		return
+	}
+	db.DB.Unscoped().Delete(&user)
+	w.WriteHeader(http.StatusOK)
 }
